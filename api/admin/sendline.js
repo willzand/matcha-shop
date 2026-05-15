@@ -41,7 +41,6 @@ export default async function handler(req, res) {
   }
 
   let msg = `📦 อัปเดตออเดอร์ ${order.order_id}\n`
-  msg += `📋 สถานะ: ${order.status}\n`
   msg += `━━━━━━━━━━━━━━━━\n`
   msg += lines.join('\n') + '\n'
   msg += `━━━━━━━━━━━━━━━━\n`
