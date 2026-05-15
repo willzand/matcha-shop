@@ -25,6 +25,7 @@ export default async function handler(req, res) {
   for (const item of order.order_items)
     msg += `• ${item.product_name} ×${item.qty}\n`
   msg += `\n💴 รวม: ${Number(order.total_jpy).toLocaleString()} JPY`
+msg += `\n💵 รวม: ${Number(order.total_thb).toLocaleString()} THB`
 
   await lineMessage(order.line_user_id, msg)
   res.json({ status: 'success' })
