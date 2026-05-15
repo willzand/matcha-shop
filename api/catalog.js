@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   const { data, error } = await sb
     .from('catalog')
     .select('*')
-    .order('brand').order('product_name')
+    .order('id', { ascending: true })
 
   if (error) return res.status(500).json({ error: error.message })
 
