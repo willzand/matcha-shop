@@ -1086,7 +1086,7 @@ async function saveRow(r){
   btn.textContent='⏳...';btn.disabled=true;btn.style.opacity='.6';
   try{
     const res = await fetch(API_ADMIN_UPDATE,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({orderId:document.getElementById(`bs-${r}`)?.dataset?.orderId||'',status,token:tok})});
+      body:JSON.stringify({orderId:document.getElementById(`bs-${r}`)?.dataset?.orderId||'',status,itemId:r,qty:Number(qty),token:tok})});
     const j = await res.json();
     if(j.error === 'unauthorized'){ logoutAdmin('Session หมดอายุ กรุณา Login ใหม่'); return; }
     if(j.status !== 'success') throw new Error(j.error || 'failed');
