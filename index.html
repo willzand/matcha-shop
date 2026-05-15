@@ -969,9 +969,10 @@ function renderStatusTbl(){
     let ot=0;
     items.forEach(o=>{
       let sc='var(--amber)';let isOut=false;
-      const sst = String(o.status||'');
+      const sst = String(o.itemStatus || o.status || '');
       if(sst.includes('หมด')||sst.includes('ไม่ได้')||sst.includes('ขาด')){sc='var(--red)';isOut=true;}
-      if(sst.includes('ได้')||sst.includes('จัดส่ง')||sst.includes('ครบ'))sc='var(--g2)';
+      if(sst.includes('ครบ')||sst.includes('จัดส่ง'))sc='var(--g2)';
+      if(sst.includes('บางส่วน'))sc='var(--amber)';
       const pu=cur==='THB'?o.priceTHB:o.priceJPY,pt=cur==='THB'?o.subTotalTHB:o.subTotalJPY;
       if(!isOut){ot+=Number(pt);grand+=Number(pt);}
       let fi=o.imageUrl;if(fi&&fi.includes('drive.google.com')){const m=fi.match(/id=([^&]+)/);if(m)fi=`https://drive.google.com/thumbnail?id=${encodeURIComponent(m[1])}&sz=w100`;}

@@ -26,12 +26,13 @@ export default async function handler(req, res) {
   for (const item of order.order_items) {
     const qty    = Number(item.qty) || 0
     const status = item.item_status || ''
-    const subJPY = qty * Number(item.price_jpy)
-    const subTHB = qty * Number(item.price_thb)
+    const soldOut = status.includes('หมด') || qty === 0
+    const subJPY = soldOut ? 0 : qty * Number(item.price_jpy)
+    const subTHB = soldOut ? 0 : qty * Number(item.price_thb)
 
-    let icon = qty === 0 ? '❌' : status.includes('หมด') ? '❌' : status.includes('บางส่วน') ? '⚠️' : '✅'
+    let icon = soldOut ? '❌' : status.includes('บางส่วน') ? '⚠️' : '✅'
 
-    if (qty > 0) {
+    if (!soldOut) {
       actualJPY += subJPY
       actualTHB += subTHB
       lines.push(`${icon} ${item.product_name} ×${qty}\n   ${subJPY.toLocaleString()} ¥ / ${subTHB.toLocaleString()} ฿`)

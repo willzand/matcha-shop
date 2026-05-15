@@ -35,18 +35,22 @@ export default async function handler(req, res) {
   const result = []
   for (const order of (data ?? [])) {
     for (const item of (order.order_items ?? [])) {
+      const qty       = Number(item.qty) || 0
+      const itemSt    = item.item_status || ''
+      const soldOut   = itemSt.includes('หมด') || qty === 0
       result.push({
         orderId:      order.order_id,
         date:         new Date(order.created_at).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }),
         name:         order.customer_name,
         brand:        item.brand,
         itemName:     item.product_name,
-        qty:          item.qty,
+        qty:          qty,
         priceJPY:     item.price_jpy,
         priceTHB:     item.price_thb,
-        subTotalJPY:  item.price_jpy * item.qty,
-        subTotalTHB:  item.price_thb * item.qty,
+        subTotalJPY:  soldOut ? 0 : item.price_jpy * qty,
+        subTotalTHB:  soldOut ? 0 : item.price_thb * qty,
         status:       order.status,
+        itemStatus:   itemSt,
         imageUrl:     item.image_url ?? ''
       })
     }
