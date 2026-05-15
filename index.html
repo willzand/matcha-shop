@@ -244,6 +244,9 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .add-row{display:flex;gap:8px;margin-top:auto}
 .qty-inp{width:52px;padding:8px 3px;text-align:center;border:2.5px solid var(--border);border-radius:var(--rMD);font-family:'Noto Sans Thai',sans-serif;font-size:.93em;background:var(--ivory);color:var(--ink);box-shadow:2px 2px 0 var(--border);transition:border-color .15s}
 .qty-inp:focus{border-color:var(--g1);outline:none}
+.qty-wrap{display:flex;align-items:center;gap:4px}
+.qty-btn{width:34px;height:34px;border:2.5px solid var(--border);border-radius:var(--rMD);background:var(--ivory);color:var(--ink);font-size:1.2em;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:2px 2px 0 var(--border);transition:all .1s;line-height:1;padding:0}
+.qty-btn:active{transform:translateY(2px);box-shadow:none}
 .add-btn{flex-grow:1;background:var(--g1);color:#fff;border:none;border-bottom:3.5px solid var(--g3);padding:9px 12px;border-radius:var(--rMD);cursor:pointer;font-family:'Noto Sans Thai',sans-serif;font-weight:800;font-size:.87em;transition:all .18s;box-shadow:2px 3px 0 var(--g3)}
 .add-btn:hover{transform:translateY(-2px);box-shadow:2px 5px 0 var(--g3)}
 .add-btn:active{transform:translateY(2px);border-bottom-width:1.5px;box-shadow:1px 1px 0 var(--g3)}
@@ -785,7 +788,11 @@ function renderShop(list){
         ${taste}
         <div class="price">💴 ${esc(p.s)}</div>
         <div class="add-row">
-          <input type="number" id="q-${item.id}" value="1" min="1" max="10" class="qty-inp">
+          <div class="qty-wrap">
+            <button class="qty-btn" onclick="adjQty(${item.id},-1)">−</button>
+            <input type="number" id="q-${item.id}" value="1" min="1" max="10" class="qty-inp">
+            <button class="qty-btn" onclick="adjQty(${item.id},1)">+</button>
+          </div>
           <button onclick="addCart(${item.id})" class="add-btn">🛒 ใส่ตะกร้า</button>
         </div>
       </div>
@@ -819,6 +826,12 @@ function renderRanking(d){
 }
 
 /* ── cart ── */
+function adjQty(id, delta){
+  const inp = document.getElementById(`q-${id}`);
+  if(!inp) return;
+  const v = Math.min(10, Math.max(1, (parseInt(inp.value)||1) + delta));
+  inp.value = v;
+}
 function addCart(id){
   const item=allData.find(m=>m.id===id);if(!item)return;
   const qEl=document.getElementById(`q-${id}`);
@@ -1073,7 +1086,7 @@ async function saveRow(r){
   btn.textContent='⏳...';btn.disabled=true;btn.style.opacity='.6';
   try{
     const res = await fetch(API_ADMIN_UPDATE,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({orderId:document.getElementById(`bs-${r}`)?.dataset?.orderId||'',status,token:tok})});
+      body:JSON.stringify({orderId:document.getElementById(`bs-${r}`)?.dataset?.orderId||'',status,itemId:r,qty:document.getElementById(`aq-${r}`)?.value,token:tok})
     const j = await res.json();
     if(j.error === 'unauthorized'){ logoutAdmin('Session หมดอายุ กรุณา Login ใหม่'); return; }
     if(j.status !== 'success') throw new Error(j.error || 'failed');
