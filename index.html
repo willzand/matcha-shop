@@ -1047,6 +1047,12 @@ async function loginAdmin() {
 }
 
 function setSt(r,t){document.getElementById(`as-${r}`).value=t;}
+function setItemSt(r, st, zeroQty=false){
+  document.getElementById(`ais-${r}`).value = st;
+  if(zeroQty) document.getElementById(`aq-${r}`).value = 0;
+  // highlight ปุ่มที่กด
+  document.getElementById(`as-${r}`).value = st;
+}
 
 async function loadAdmin(){
   const body=document.getElementById('adm-body');
@@ -1070,7 +1076,7 @@ async function loadAdmin(){
       html+=`<tr style="background:linear-gradient(90deg,var(--g3),var(--sk2));color:#fff"><td colspan="5" style="padding:10px 13px;font-weight:700;font-size:.88em">📦 ${oidEsc} · 📅 ${esc(dt)} · 👤 ${esc(cn)}</td><td style="text-align:center;padding:7px"><button id="bl-${oidEsc}" onclick="sendLine('${oidJs}')" style="background:var(--line);color:#fff;border:none;border-bottom:3px solid #028a38;padding:6px 10px;border-radius:var(--r);cursor:pointer;font-family:'Noto Sans Thai';font-weight:700;font-size:.79em;width:100%;transition:.15s;box-shadow:2px 2px 0 #028a38">💬 ส่ง LINE</button></td></tr>`;
       items.forEach(o=>{
         let fi=o.imageUrl;if(fi&&fi.includes('drive.google.com')){const m=fi.match(/id=([^&]+)/);if(m)fi=`https://drive.google.com/thumbnail?id=${encodeURIComponent(m[1])}&sz=w100`;}
-        html+=`<tr style="background:${bg};border-bottom:1.5px dashed var(--border)"><td style="text-align:center;color:var(--border);font-size:.79em">${esc(o.date)}</td><td style="color:var(--ink3);font-size:.83em">${esc(o.name)}</td><td><div style="display:flex;align-items:center;gap:8px"><img src="${esc(safeUrl(fi))}" style="width:33px;height:33px;object-fit:cover;border-radius:var(--rSM);border:2px solid var(--border);flex-shrink:0"><span style="font-weight:700;font-size:.84em">${esc(o.itemName)}</span></div></td><td style="text-align:center"><input type="number" id="aq-${o.row}" value="${esc(o.qty)}" class="ai" style="text-align:center;width:50px"></td><td><input type="text" id="as-${o.row}" value="${esc(o.status)}" class="ai" placeholder="พิมพ์สถานะ..."><div style="margin-top:4px"><button class="qk-btn" onclick="setSt(${o.row},'✅ ได้ครบ')">✅ ครบ</button><button class="qk-btn" onclick="setSt(${o.row},'⚠️ ได้บางส่วน')">⚠️ บางส่วน</button><button class="qk-btn" onclick="setSt(${o.row},'❌ ของหมด')">❌ หมด</button></div></td><td style="text-align:center"><button id="bs-${o.row}" class="sv-btn" data-order-id="${oidEsc}" onclick="saveRow(${o.row})">💾 บันทึก</button></td></tr>`;
+        html+=`<tr style="background:${bg};border-bottom:1.5px dashed var(--border)"><td style="text-align:center;color:var(--border);font-size:.79em">${esc(o.date)}</td><td style="color:var(--ink3);font-size:.83em">${esc(o.name)}</td><td><div style="display:flex;align-items:center;gap:8px"><img src="${esc(safeUrl(fi))}" style="width:33px;height:33px;object-fit:cover;border-radius:var(--rSM);border:2px solid var(--border);flex-shrink:0"><span style="font-weight:700;font-size:.84em">${esc(o.itemName)}</span></div></td><td style="text-align:center"><input type="number" id="aq-${o.row}" value="${esc(o.qty)}" class="ai" style="text-align:center;width:50px"></td><td><input type="text" id="as-${o.row}" value="${esc(o.status)}" class="ai" placeholder="พิมพ์สถานะ..."><input type="hidden" id="ais-${o.row}" value="${esc(o.itemStatus||'')}"><div style="margin-top:4px"><button class="qk-btn" onclick="setItemSt(${o.row},'✅ ได้ครบ')">✅ ครบ</button><button class="qk-btn" onclick="setItemSt(${o.row},'⚠️ ได้บางส่วน')">⚠️ บางส่วน</button><button class="qk-btn" onclick="setItemSt(${o.row},'❌ ของหมด',true)">❌ หมด</button></div></td><td style="text-align:center"><button id="bs-${o.row}" class="sv-btn" data-order-id="${oidEsc}" onclick="saveRow(${o.row})">💾 บันทึก</button></td></tr>`;
       });
       html+=`<tr style="border-bottom:5px solid var(--border)"><td colspan="6" style="padding:3px"></td></tr>`;
     });
@@ -1086,7 +1092,7 @@ async function saveRow(r){
   btn.textContent='⏳...';btn.disabled=true;btn.style.opacity='.6';
   try{
     const res = await fetch(API_ADMIN_UPDATE,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({orderId:document.getElementById(`bs-${r}`)?.dataset?.orderId||'',status,itemId:r,qty:Number(qty),token:tok})});
+      body:JSON.stringify({orderId:document.getElementById(`bs-${r}`)?.dataset?.orderId||'',status,itemId:r,qty:Number(qty),itemStatus:document.getElementById(`ais-${r}`)?.value||'',token:tok})});
     const j = await res.json();
     if(j.error === 'unauthorized'){ logoutAdmin('Session หมดอายุ กรุณา Login ใหม่'); return; }
     if(j.status !== 'success') throw new Error(j.error || 'failed');

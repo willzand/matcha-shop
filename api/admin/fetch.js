@@ -21,15 +21,16 @@ export default async function handler(req, res) {
   for (const order of data) {
     for (const item of (order.order_items ?? [])) {
       rows.push({
-        row:      item.id,
-        orderId:  order.order_id,
-        date:     new Date(order.created_at).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }),
-        name:     order.customer_name,
-        brand:    item.brand ?? '',
-        itemName: item.product_name,
-        qty:      item.qty,
-        status:   order.status,
-        imageUrl: item.image_url ?? 'https://via.placeholder.com/60?text=No+Img'
+        row:        item.id,
+        orderId:    order.order_id,
+        date:       new Date(order.created_at).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }),
+        name:       order.customer_name,
+        brand:      item.brand ?? '',
+        itemName:   item.product_name,
+        qty:        item.qty,
+        itemStatus: item.item_status ?? '',
+        status:     order.status,
+        imageUrl:   item.image_url ?? 'https://via.placeholder.com/60?text=No+Img'
       })
     }
   }

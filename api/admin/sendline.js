@@ -20,12 +20,33 @@ export default async function handler(req, res) {
   if (error || !order) return res.status(404).json({ error: 'order_not_found' })
   if (!order.line_user_id) return res.status(400).json({ error: 'no_line_user' })
 
+  let actualJPY = 0, actualTHB = 0
+  const lines = []
+
+  for (const item of order.order_items) {
+    const qty    = Number(item.qty) || 0
+    const status = item.item_status || ''
+    const subJPY = qty * Number(item.price_jpy)
+    const subTHB = qty * Number(item.price_thb)
+
+    let icon = qty === 0 ? '❌' : status.includes('หมด') ? '❌' : status.includes('บางส่วน') ? '⚠️' : '✅'
+
+    if (qty > 0) {
+      actualJPY += subJPY
+      actualTHB += subTHB
+      lines.push(`${icon} ${item.product_name} ×${qty}\n   ${subJPY.toLocaleString()} ¥ / ${subTHB.toLocaleString()} ฿`)
+    } else {
+      lines.push(`❌ ${item.product_name} — ของหมด`)
+    }
+  }
+
   let msg = `📦 อัปเดตออเดอร์ ${order.order_id}\n`
-  msg += `📋 สถานะ: ${order.status}\n\n🍵 รายการ:\n`
-  for (const item of order.order_items)
-    msg += `• ${item.product_name} ×${item.qty}\n`
-  msg += `\n💴 รวม: ${Number(order.total_jpy).toLocaleString()} JPY`
-msg += `\n💵 รวม: ${Number(order.total_thb).toLocaleString()} THB`
+  msg += `📋 สถานะ: ${order.status}\n`
+  msg += `━━━━━━━━━━━━━━━━\n`
+  msg += lines.join('\n') + '\n'
+  msg += `━━━━━━━━━━━━━━━━\n`
+  msg += `💴 ยอดที่ต้องชำระ: ${actualJPY.toLocaleString()} JPY\n`
+  msg += `💵 ยอดที่ต้องชำระ: ${actualTHB.toLocaleString()} THB`
 
   await lineMessage(order.line_user_id, msg)
   res.json({ status: 'success' })

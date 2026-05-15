@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST')   return res.status(405).end()
 
-  const { token, orderId, status, itemId, qty } = req.body ?? {}
+  const { token, orderId, status, itemId, qty, itemStatus } = req.body ?? {}
   if (!checkSession(token))  return res.status(401).json({ error: 'unauthorized' })
   if (!orderId || !status)   return res.status(400).json({ error: 'missing_fields' })
 
@@ -18,14 +18,19 @@ export default async function handler(req, res) {
     .eq('order_id', orderId)
   if (oErr) return res.status(500).json({ error: oErr.message })
 
-  // 2. ถ้าส่ง itemId + qty มาด้วย → อัปเดต qty ของ item นั้น
-  if (itemId && qty !== undefined) {
-    const newQty = Math.max(0, Math.min(10, Number(qty)))
-    const { error: iErr } = await sb
-      .from('order_items')
-      .update({ qty: newQty })
-      .eq('id', itemId)
-    if (iErr) return res.status(500).json({ error: iErr.message })
+  // 2. อัปเดต qty + item_status ของ item นั้น
+  if (itemId) {
+    const updates = {}
+    if (qty !== undefined) updates.qty = Math.max(0, Math.min(10, Number(qty)))
+    if (itemStatus)        updates.item_status = String(itemStatus).slice(0, 50)
+
+    if (Object.keys(updates).length > 0) {
+      const { error: iErr } = await sb
+        .from('order_items')
+        .update(updates)
+        .eq('id', itemId)
+      if (iErr) return res.status(500).json({ error: iErr.message })
+    }
   }
 
   res.json({ status: 'success' })
