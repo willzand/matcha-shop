@@ -38,7 +38,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:0 18px 110px}
 
 /* ═══════════ POPUP (compact) ═══════════ */
-.popup-ov{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(30,20,8,.5);backdrop-filter:blur(6px);animation:ovIn .3s ease}
+.popup-ov{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(30,20,8,.5);backdrop-filter:blur(6px);animation:ovIn .3s ease;-webkit-overflow-scrolling:touch}
 @keyframes ovIn{from{opacity:0}to{opacity:1}}
 .popup-box{
   background:var(--cream);
@@ -1086,7 +1086,7 @@ async function saveRow(r){
   btn.textContent='⏳...';btn.disabled=true;btn.style.opacity='.6';
   try{
     const res = await fetch(API_ADMIN_UPDATE,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({orderId:document.getElementById(`bs-${r}`)?.dataset?.orderId||'',status,itemId:r,qty:document.getElementById(`aq-${r}`)?.value,token:tok})
+      body:JSON.stringify({orderId:document.getElementById(`bs-${r}`)?.dataset?.orderId||'',status,token:tok})});
     const j = await res.json();
     if(j.error === 'unauthorized'){ logoutAdmin('Session หมดอายุ กรุณา Login ใหม่'); return; }
     if(j.status !== 'success') throw new Error(j.error || 'failed');
